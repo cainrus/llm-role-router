@@ -76,7 +76,7 @@ export function parseKeychainCredentials(raw: string, now = Date.now()): ClaudeO
 export function listCredentialServices(dump: string): string[] {
   const found = new Set<string>()
   for (const match of dump.matchAll(/"svce"<blob>="(Claude Code-credentials[^"]*)"/g)) {
-    found.add(match[1])
+    if (match[1]) found.add(match[1])
   }
   return [...found]
 }
@@ -98,7 +98,7 @@ function readService(service: string): ClaudeOAuthToken | null {
 /** The longest-lived candidate; an undated token ranks below any dated one. */
 export function pickFreshest(tokens: readonly ClaudeOAuthToken[]): ClaudeOAuthToken | null {
   if (!tokens.length) return null
-  return [...tokens].sort((a, b) => (b.expiresAt ?? 0) - (a.expiresAt ?? 0))[0]
+  return [...tokens].sort((a, b) => (b.expiresAt ?? 0) - (a.expiresAt ?? 0))[0] ?? null
 }
 
 /**

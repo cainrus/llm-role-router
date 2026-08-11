@@ -18,19 +18,32 @@ export interface RunOptions {
   env?: Record<string, string | undefined>
 }
 
+interface PromptInput {
+  system?: string
+  prompt?: string
+  messages?: ModelMessage[]
+}
+
+/**
+ * `prompt` and `messages` are mutually exclusive in the AI SDK's own types
+ * (a discriminated union), so this builds one concrete shape instead of
+ * spreading an object where both keys are merely optional — the spread
+ * version doesn't structurally match either arm of the union.
+ */
+function promptOrMessages(opts: PromptInput): { system?: string, prompt: string } | { system?: string, messages: ModelMessage[] } {
+  if (opts.messages) return { system: opts.system, messages: opts.messages }
+  return { system: opts.system, prompt: opts.prompt ?? '' }
+}
+
 /**
  * Codex only answers over SSE regardless of what's requested — generateText's
  * non-streaming doGenerate never sends `stream` and the call hangs/errors.
  * Every other provider goes through generateText normally.
  */
-async function generateTextCompat(model: ReturnType<typeof resolveModel>['model'], opts: {
-  system?: string
-  prompt?: string
-  messages?: ModelMessage[]
-}, isCodex: boolean) {
-  if (!isCodex) return generateText({ model, ...opts })
+async function generateTextCompat(model: ReturnType<typeof resolveModel>['model'], opts: PromptInput, isCodex: boolean) {
+  if (!isCodex) return generateText({ model, ...promptOrMessages(opts) })
 
-  const result = streamText({ model, ...opts })
+  const result = streamText({ model, ...promptOrMessages(opts) })
   let text = ''
   for await (const chunk of result.textStream) text += chunk
   return { text, usage: await result.usage }
@@ -82,7 +95,7 @@ export async function runObject<T>(options: RunObjectOptions<T>): Promise<T> {
   const started = performance.now()
 
   try {
-    const { object, usage } = await generateObject({ model, schema, system, prompt, messages })
+    const { object, usage } = await generateObject({ model, schema, ...promptOrMessages({ system, prompt, messages }) })
     logUsage({
       role,
       provider: spec.provider,

@@ -94,7 +94,11 @@ export function resolveModelSpec(
     catch (e) {
       // Name the variable that carries the bad value: without it the message
       // points at a call site that is doing nothing wrong.
-      throw new Error(`${name}: ${e instanceof Error ? e.message : String(e)}`, { cause: e })
+      //
+      // Built via Object.assign, not `new Error(msg, { cause })`: a consumer
+      // typechecking under an ES2020 lib target has no 2-arg Error overload,
+      // and this works under any target since `cause` isn't typed on Error.
+      throw Object.assign(new Error(`${name}: ${e instanceof Error ? e.message : String(e)}`), { cause: e })
     }
   }
 

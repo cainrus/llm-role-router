@@ -1,0 +1,17 @@
+Fix strict-TS issues found migrating dashboard's 6 call sites onto this
+
+Problem: dashboard's tsc runs under strict:true + ES2020 lib, which caught
+three things node:test's type-erased run never would: prompt/messages
+built as one spread object doesn't match the AI SDK's discriminated
+union (TS2345), `new Error(msg, { cause })`'s 2-arg form needs an
+ES2022+ lib target (TS2554), and two array-index reads assumed
+non-undefined under a stricter indexed-access setting than this
+package's own tsconfig-less test run exercises.
+Change: run.ts builds prompt/messages as one concrete object per branch
+instead of spreading optional keys; spec.ts's env-var error now attaches
+`cause` via Object.assign instead of the constructor's second arg;
+claudeOAuth.ts guards the two index reads.
+Verify: `npm test` (63/63 still pass); `pnpm nx run {main,insights,
+tracks,reports}:typecheck` in ~/dashboard show zero errors under
+src/myprojects/agents (dashboard's own unrelated pre-existing errors in
+other apps/ layers are untouched).
