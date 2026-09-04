@@ -1,6 +1,6 @@
 // THE one place role -> model is decided. A caller asks for a role by name;
 // changing which model/provider backs that role is a one-line edit here, not
-// a grep across every consumer repo (dotfiles, dashboard, whatever comes next).
+// a grep across every consumer repo.
 //
 // A role not listed here still works if the caller passes its own `fallback`
 // (see spec.ts) — this table only overrides, it is not exhaustive by design.

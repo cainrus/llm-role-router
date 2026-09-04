@@ -7,9 +7,8 @@ consumer repo needs to change.
 
 ## Why
 
-Two consumers on this machine (`~/dotfiles`, `~/dashboard`) were each about to
-grow their own "which model for this call" logic. This package is the one
-place that decision lives, plus:
+Two separate codebases were each about to grow their own "which model for this
+call" logic. This package is the one place that decision lives, plus:
 
 - **Usage logging.** Every call through `runText`/`runObject` appends one
   JSONL line to `~/.agents/usage.jsonl` (override with `AGENT_USAGE_LOG`):
@@ -60,17 +59,22 @@ AGENT_MODEL=deepseek:deepseek-v4-flash node your-script.ts             # every r
 Resolution order for a role: per-role env var → global env var →
 `src/roles.ts` entry → the `fallback` the caller passed to `runText`/`runObject`.
 
-## Consuming from another local project
+## Consuming it
 
-No registry — a `file:`/`link:` dependency on this path (see the repo-level
-report for why). From a plain `package.json`:
+Not published to a registry. The whole point of the package is that changing a
+role's model is a one-line edit; a registry release would put a version bump
+and a reinstall in front of every such edit. Depend on the checkout by path:
 
 ```json
-"dependencies": { "agents": "file:/Users/starassov/myprojects/agents" }
+"dependencies": { "agents": "link:../agents" }
 ```
 
-From a pnpm workspace, `link:` (relative) works the same way without pnpm's
-copy-on-install semantics.
+`file:` works too; in a pnpm or Yarn workspace `link:` avoids the
+copy-on-install semantics, so an edit here is visible to the consumer at once.
+
+Use a **relative** specifier, never `~`. npm and Yarn take `~/…` literally and
+happily create a symlink to a directory named `~`; the install reports success
+and the failure surfaces much later, at resolve time.
 
 ## Development
 
