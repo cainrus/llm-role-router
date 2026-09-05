@@ -1,5 +1,7 @@
 # agents
 
+[![CI](https://github.com/cainrus/llm-role-router/actions/workflows/ci.yml/badge.svg)](https://github.com/cainrus/llm-role-router/actions/workflows/ci.yml)
+
 Role-based LLM runner. A caller asks for a *role* (`classifier`, `reviewer`,
 `bulk`, ...); this package decides which model/provider actually runs it.
 Swapping the model behind a role is a one-line edit in `src/roles.ts` — no
@@ -18,6 +20,31 @@ call" logic. This package is the one place that decision lives, plus:
 - **Provider-agnostic call sites.** Add a provider by adding one file under
   `src/providers/` and one branch in `src/provider.ts`; nothing at any call
   site changes.
+
+## What this adds over the AI SDK
+
+A thin layer on top of the [AI SDK](https://github.com/vercel/ai), not a
+replacement — `ai` still does the generating. What lives here is the part every
+call site would otherwise write for itself:
+
+- **A role, not a model id.** The call site says `role: 'classifier'`; which
+  model that is stays in `src/roles.ts`, and an env var can override it per
+  role without touching the caller.
+- **Usage recorded on both paths.** `runText`/`runObject` write the JSONL line
+  when a call fails too, not only when it succeeds — a failed run still shows
+  its role, provider, model and latency.
+- **Credentials resolved, not configured.** `anthropic` and `codex` pick up an
+  existing local subscription login before falling back to an env-var key, so
+  a script often needs no key set at all.
+- **Provider quirks absorbed.** Codex answers only over SSE, where
+  `generateText`'s non-streaming path stalls; `runText` streams and reassembles
+  for that provider and leaves every other one alone.
+- **Structured output through `generateObject`.** Deliberately not tool calls:
+  a classifier asked for JSON via a tool call runs the tool instead of
+  describing it.
+
+It does not wrap streaming or tool use — reach for `ai` directly when you need
+those.
 
 ## Providers
 
@@ -38,7 +65,8 @@ another program already wrote, never a second copy of a credential.
 ## Usage
 
 ```ts
-import { runText, runObject } from 'agents'
+import { z } from 'zod'
+import { runObject, runText } from 'agents'
 
 const text = await runText({ role: 'summarizer', prompt: 'Summarize: ...' })
 
@@ -61,9 +89,11 @@ Resolution order for a role: per-role env var → global env var →
 
 ## Consuming it
 
-Not published to a registry. The whole point of the package is that changing a
-role's model is a one-line edit; a registry release would put a version bump
-and a reinstall in front of every such edit. Depend on the checkout by path:
+Not published to a registry, and marked `"private": true` so a stray
+`npm publish` cannot change that. The whole point of the package is that
+changing a role's model is a one-line edit; a registry release would put a
+version bump and a reinstall in front of every such edit. Depend on the
+checkout by path:
 
 ```json
 "dependencies": { "agents": "link:../agents" }
