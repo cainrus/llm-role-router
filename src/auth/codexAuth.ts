@@ -1,5 +1,5 @@
 // Read the local Codex login so a call can run on the ChatGPT subscription
-// instead of a paid OPENAI_API_KEY. Ported verbatim from dashboard/libs/ai.
+// instead of a paid OPENAI_API_KEY.
 //
 // Two differences from the Anthropic side, both easy to get wrong:
 //

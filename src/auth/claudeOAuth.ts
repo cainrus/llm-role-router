@@ -1,9 +1,8 @@
 // Reads the local Claude Code OAuth token so calls can run on the machine's
 // own subscription instead of a separate ANTHROPIC_API_KEY.
 //
-// Ported verbatim from dashboard/libs/core/src/auth/claudeOAuth.ts. This is
-// the one deliberate exception to "credentials only via env" for this
-// package: it never stores or duplicates a credential, it only reads what
+// This is the one deliberate exception to "credentials only via env" for
+// this package: it never stores or duplicates a credential, it only reads what
 // Claude Code itself already wrote to the login keychain — the same trust
 // boundary the CLI itself relies on.
 //

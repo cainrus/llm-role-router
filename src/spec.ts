@@ -2,9 +2,9 @@
 // choice is data a caller can pass, an env var can override, and a test can
 // assert on, rather than a constant frozen into each call site.
 //
-// Ported from dashboard's libs/ai (same shape, ai-consumers.md-approved), then
-// generalized: env prefix is AGENT_MODEL instead of DASHBOARD_AI_MODEL, and
-// `deepinfra` was added as a provider.
+// Lifted from a private application where this shape had already earned its
+// keep, then generalized for reuse: the env prefix became AGENT_MODEL, and
+// `deepinfra` joined the provider list.
 
 /** Providers this package knows how to authenticate. */
 export const PROVIDERS = ['anthropic', 'deepseek', 'deepinfra', 'codex'] as const

@@ -1,5 +1,4 @@
-// The ChatGPT subscription as an AI SDK provider. Ported verbatim from
-// dashboard/libs/ai/src/codex.ts.
+// The ChatGPT subscription as an AI SDK provider.
 //
 // This is NOT api.openai.com with a different credential. The subscription
 // token is issued for a separate backend that the codex CLI talks to; the paid
