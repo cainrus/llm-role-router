@@ -1,4 +1,4 @@
-// agents — every LLM call in dotfiles/dashboard picks its model through here.
+// agents — the one place an application's LLM calls pick their model.
 //
 // A call site names its role; roles.ts (or an env override) decides the
 // model/provider:
