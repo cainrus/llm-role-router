@@ -50,7 +50,7 @@ those.
 
 | provider    | env credential(s)                                   | notes |
 |-------------|-------------------------------------------------------|-------|
-| `anthropic` | Claude Code's own OAuth login (keychain, read-only), else `ANTHROPIC_API_KEY` | default provider for a bare model id |
+| `anthropic` | `CLAUDE_CODE_OAUTH_TOKEN` (a `claude setup-token` token), else Claude Code's own OAuth login (keychain, read-only), else `ANTHROPIC_API_KEY` | default provider for a bare model id |
 | `deepseek`  | `DEEPSEEK_API_KEY`                                     | native Anthropic-protocol endpoint, no separate SDK package |
 | `deepinfra` | `DEEPINFRA_API_KEY`                                    | e.g. `deepinfra:zai-org/GLM-5.2` |
 | `codex`     | `~/.codex/auth.json` (ChatGPT subscription), else `OPENAI_OAUTH_TOKEN` | grey-area use of the subscription backend — see `src/providers/codex.ts` |

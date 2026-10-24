@@ -21,7 +21,7 @@ export {
 export { ROLE_MODELS, roleDefault } from './roles.ts'
 
 export type { AnthropicAuth, ClaudeOAuthToken } from './auth/claudeOAuth.ts'
-export { readClaudeOAuthToken, resolveAnthropicAuth } from './auth/claudeOAuth.ts'
+export { OAUTH_TOKEN_ENV, readClaudeOAuthToken, resolveAnthropicAuth } from './auth/claudeOAuth.ts'
 
 export type { CodexAuth, ReadCodexAuthOptions } from './auth/codexAuth.ts'
 export {

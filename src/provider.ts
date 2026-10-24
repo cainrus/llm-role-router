@@ -4,7 +4,7 @@
 import { createAnthropic } from '@ai-sdk/anthropic'
 import { createDeepInfra } from '@ai-sdk/deepinfra'
 import type { LanguageModel } from 'ai'
-import { resolveAnthropicAuth } from './auth/claudeOAuth.ts'
+import { OAUTH_TOKEN_ENV, resolveAnthropicAuth } from './auth/claudeOAuth.ts'
 import { readCodexAuth } from './auth/codexAuth.ts'
 import { createCodexProvider } from './providers/codex.ts'
 import { roleDefault } from './roles.ts'
@@ -54,9 +54,9 @@ export function formatModelSpec(spec: ModelSpec): string {
 function anthropicSettingsFor(spec: ModelSpec, env: Record<string, string | undefined>): AnthropicSettings {
   if (spec.provider === 'deepseek') return deepseekSettings(env)
 
-  const auth = resolveAnthropicAuth(env.ANTHROPIC_API_KEY)
+  const auth = resolveAnthropicAuth(env.ANTHROPIC_API_KEY, env[OAUTH_TOKEN_ENV])
   if (!auth) {
-    throw new Error('No Anthropic credentials: sign in to Claude Code or set ANTHROPIC_API_KEY')
+    throw new Error(`No Anthropic credentials: set ${OAUTH_TOKEN_ENV}, sign in to Claude Code, or set ANTHROPIC_API_KEY`)
   }
   return toAnthropicSettings(auth)
 }

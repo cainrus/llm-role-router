@@ -141,24 +141,38 @@ export interface AnthropicAuth {
   }
 }
 
+/** The variable Claude Code itself reads a `claude setup-token` token from. */
+export const OAUTH_TOKEN_ENV = 'CLAUDE_CODE_OAUTH_TOKEN'
+
+function oauthAuth(token: string): AnthropicAuth {
+  return {
+    kind: 'oauth',
+    clientOptions: {
+      authToken: token,
+      defaultHeaders: { 'anthropic-beta': OAUTH_BETA_HEADER },
+    },
+  }
+}
+
 /**
- * Pick how to authenticate: the local Claude Code subscription first, an
- * explicit API key second. Returns null when neither is available.
+ * Pick how to authenticate: an exported Claude Code OAuth token first, the
+ * keychain login second, an explicit API key last. Returns null when none is
+ * available.
+ *
+ * The exported token wins over the keychain for the same reason it does in
+ * Claude Code: a machine that authenticates its sessions with
+ * `CLAUDE_CODE_OAUTH_TOKEN` never refreshes the keychain entry, so that entry
+ * goes stale (or is emptied) while the token in env keeps working. Reading the
+ * keychain first would report "no credentials" with a live token in hand.
  *
  * Exactly one credential is ever set on the client — see the note above about
  * sending both.
  */
-export function resolveAnthropicAuth(apiKey?: string): AnthropicAuth | null {
+export function resolveAnthropicAuth(apiKey?: string, oauthToken?: string): AnthropicAuth | null {
+  const exported = oauthToken?.trim()
+  if (exported) return oauthAuth(exported)
   const oauth = readClaudeOAuthToken()
-  if (oauth) {
-    return {
-      kind: 'oauth',
-      clientOptions: {
-        authToken: oauth.token,
-        defaultHeaders: { 'anthropic-beta': OAUTH_BETA_HEADER },
-      },
-    }
-  }
+  if (oauth) return oauthAuth(oauth.token)
   const key = apiKey?.trim()
   return key ? { kind: 'apiKey', clientOptions: { apiKey: key } } : null
 }
