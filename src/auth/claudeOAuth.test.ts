@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { listCredentialServices, parseKeychainCredentials, pickFreshest } from './claudeOAuth.ts'
+import { listCredentialServices, OAUTH_BETA_HEADER, parseKeychainCredentials, pickFreshest, resolveAnthropicAuth } from './claudeOAuth.ts'
 
 const NOW = Date.parse('2026-07-21T12:00:00Z')
 
@@ -77,4 +77,12 @@ test('pickFreshest: takes the longest-lived token', () => {
 test('pickFreshest: ranks an undated token below a dated one, and handles the empty case', () => {
   assert.equal(pickFreshest([{ token: 'undated' }, { token: 'dated', expiresAt: 1 }])?.token, 'dated')
   assert.equal(pickFreshest([]), null)
+})
+
+test('resolveAnthropicAuth: an exported OAuth token wins over the API key, sent as bearer with the beta header', () => {
+  const auth = resolveAnthropicAuth('sk-ant-api-key', '  oat-exported  ')
+  assert.equal(auth?.kind, 'oauth')
+  assert.equal(auth?.clientOptions.authToken, 'oat-exported')
+  assert.equal(auth?.clientOptions.apiKey, undefined)
+  assert.equal(auth?.clientOptions.defaultHeaders?.['anthropic-beta'], OAUTH_BETA_HEADER)
 })
